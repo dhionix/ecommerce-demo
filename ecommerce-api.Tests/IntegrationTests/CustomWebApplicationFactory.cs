@@ -8,11 +8,8 @@ namespace ecommerce_api.Tests.IntegrationTests
     {
         protected override IHost CreateHost(IHostBuilder builder)
         {
-            // Configure test-specific settings if needed
-            builder.ConfigureServices(services =>
-            {
-                // Any test-specific service configurations can be added here
-            });
+            // Configure test-specific settings
+            builder.UseEnvironment("Test");
 
             return base.CreateHost(builder);
         }

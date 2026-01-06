@@ -34,16 +34,47 @@ namespace ecommerce_api.Controllers
                 return BadRequest(new { message });
             }
 
-            var token = _jwtService.GenerateToken(user!);
-            var response = new AuthResponse
-            {
-                Token = token,
-                Username = user!.Username,
-                Email = user.Email,
-                ExpiresAt = _jwtService.GetTokenExpiration()
+            // Return success message without token for security
+            // In production, the activation token would be sent via email
+            // For development/testing, check environment or use a configuration flag
+            var response = new { 
+                message = "User registered successfully. Please check your email to verify your account.", 
+                email = user!.Email,
+                username = user.Username 
             };
+            
+            // Only include activation token in development/test for testing convenience
+            var env = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
+            if (env.IsDevelopment() || env.IsEnvironment("Test"))
+            {
+                return CreatedAtAction(nameof(Register), new { id = user.Id }, new {
+                    response.message,
+                    response.email,
+                    response.username,
+                    activationToken = user.ActivationToken,
+                    note = "Activation token included for development/testing only"
+                });
+            }
 
             return CreatedAtAction(nameof(Register), new { id = user.Id }, response);
+        }
+
+        [HttpPost("verify-email")]
+        public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var (success, message) = await _authService.VerifyEmail(request.Email, request.Token);
+
+            if (!success)
+            {
+                return BadRequest(new { message });
+            }
+
+            return Ok(new { message });
         }
 
         [HttpPost("login")]

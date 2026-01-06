@@ -2,6 +2,7 @@ using ecommerce_api.Models;
 using ecommerce_api.Models.DTOs;
 using BCrypt.Net;
 using System.Collections.Concurrent;
+using System.Security.Cryptography;
 
 namespace ecommerce_api.Services
 {
@@ -24,20 +25,69 @@ namespace ecommerce_api.Services
                 return (false, "Email already exists", null);
             }
 
+            // Generate activation token
+            var activationToken = GenerateActivationToken();
+
             // Create new user with hashed password
             var user = new User
             {
                 Id = _nextUserId++,
                 Username = request.Username,
+                FirstName = request.FirstName,
+                LastName = request.LastName,
                 Email = request.Email,
+                PhoneNumber = request.PhoneNumber,
+                Address = request.Address,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
-                CreatedAt = DateTime.UtcNow,
-                IsActive = true
+                Role = request.Role,
+                ActivationToken = activationToken,
+                EmailVerified = false,
+                IsActive = false, // Account is inactive until email is verified
+                CreatedAt = DateTime.UtcNow
             };
 
             _users[user.Id] = user;
 
-            return await Task.FromResult((true, "User registered successfully", user));
+            // In a real application, you would send an email here with the activation link
+            // For now, we'll just return success
+            return await Task.FromResult((true, "User registered successfully. Please check your email to verify your account.", user));
+        }
+
+        public async Task<(bool Success, string Message)> VerifyEmail(string email, string token)
+        {
+            var user = _users.Values.FirstOrDefault(u => 
+                u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
+
+            if (user == null)
+            {
+                return (false, "User not found");
+            }
+
+            if (user.EmailVerified)
+            {
+                return (false, "Email already verified");
+            }
+
+            if (user.ActivationToken != token)
+            {
+                return (false, "Invalid activation token");
+            }
+
+            user.EmailVerified = true;
+            user.IsActive = true;
+            user.ActivationToken = null;
+
+            return await Task.FromResult((true, "Email verified successfully. Your account is now active."));
+        }
+
+        private string GenerateActivationToken()
+        {
+            var randomBytes = new byte[32];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(randomBytes);
+            }
+            return Convert.ToBase64String(randomBytes);
         }
 
         public async Task<(bool Success, string Message, User? User)> ValidateCredentials(LoginRequest request)

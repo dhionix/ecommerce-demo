@@ -19,6 +19,21 @@ namespace ecommerce_api.Tests.IntegrationTests
             _client = factory.CreateClient();
         }
 
+        private async Task<string> RegisterAndActivateUser(RegisterRequest request)
+        {
+            var registerResponse = await _client.PostAsJsonAsync("/api/auth/register", request);
+            var registerResult = await registerResponse.Content.ReadFromJsonAsync<JsonElement>();
+            var activationToken = registerResult.GetProperty("activationToken").GetString();
+            
+            // Verify email to activate account
+            await _client.PostAsJsonAsync("/api/auth/verify-email", new { 
+                Email = request.Email, 
+                Token = activationToken 
+            });
+            
+            return activationToken!;
+        }
+
         [Fact]
         public async Task Login_ValidCredentials_Returns200OKWithToken()
         {
@@ -26,10 +41,14 @@ namespace ecommerce_api.Tests.IntegrationTests
             var registerRequest = new RegisterRequest
             {
                 Username = "loginuser1",
+                FirstName = "Login",
+                LastName = "User1",
                 Email = "loginuser1@example.com",
-                Password = "Test@1234"
+                PhoneNumber = "+1234567801",
+                Password = "Test@1234",
+                ConfirmPassword = "Test@1234"
             };
-            await _client.PostAsJsonAsync("/api/auth/register", registerRequest);
+            await RegisterAndActivateUser(registerRequest);
 
             var loginRequest = new LoginRequest
             {
@@ -55,10 +74,14 @@ namespace ecommerce_api.Tests.IntegrationTests
             var registerRequest = new RegisterRequest
             {
                 Username = "loginuser2",
+                FirstName = "Login",
+                LastName = "User2",
                 Email = "loginuser2@example.com",
-                Password = "Test@1234"
+                PhoneNumber = "+1234567802",
+                Password = "Test@1234",
+                ConfirmPassword = "Test@1234"
             };
-            await _client.PostAsJsonAsync("/api/auth/register", registerRequest);
+            await RegisterAndActivateUser(registerRequest);
 
             var loginRequest = new LoginRequest
             {
@@ -85,10 +108,14 @@ namespace ecommerce_api.Tests.IntegrationTests
             var registerRequest = new RegisterRequest
             {
                 Username = "loginuser3",
+                FirstName = "Login",
+                LastName = "User3",
                 Email = "loginuser3@example.com",
-                Password = "Test@1234"
+                PhoneNumber = "+1234567803",
+                Password = "Test@1234",
+                ConfirmPassword = "Test@1234"
             };
-            await _client.PostAsJsonAsync("/api/auth/register", registerRequest);
+            await RegisterAndActivateUser(registerRequest);
 
             var loginRequest = new LoginRequest
             {
@@ -113,10 +140,14 @@ namespace ecommerce_api.Tests.IntegrationTests
             var registerRequest = new RegisterRequest
             {
                 Username = "loginuser4",
+                FirstName = "Login",
+                LastName = "User4",
                 Email = "loginuser4@example.com",
-                Password = "Test@1234"
+                PhoneNumber = "+1234567804",
+                Password = "Test@1234",
+                ConfirmPassword = "Test@1234"
             };
-            await _client.PostAsJsonAsync("/api/auth/register", registerRequest);
+            await RegisterAndActivateUser(registerRequest);
 
             var loginRequest = new LoginRequest
             {
@@ -163,10 +194,14 @@ namespace ecommerce_api.Tests.IntegrationTests
             var registerRequest = new RegisterRequest
             {
                 Username = "loginuser5",
+                FirstName = "Login",
+                LastName = "User5",
                 Email = "loginuser5@example.com",
-                Password = "Test@1234"
+                PhoneNumber = "+1234567805",
+                Password = "Test@1234",
+                ConfirmPassword = "Test@1234"
             };
-            await _client.PostAsJsonAsync("/api/auth/register", registerRequest);
+            await RegisterAndActivateUser(registerRequest);
 
             var loginRequest = new LoginRequest
             {
@@ -227,10 +262,14 @@ namespace ecommerce_api.Tests.IntegrationTests
             var registerRequest = new RegisterRequest
             {
                 Username = "loginuser6",
+                FirstName = "Login",
+                LastName = "User6",
                 Email = "loginuser6@example.com",
-                Password = "Test@1234"
+                PhoneNumber = "+1234567806",
+                Password = "Test@1234",
+                ConfirmPassword = "Test@1234"
             };
-            await _client.PostAsJsonAsync("/api/auth/register", registerRequest);
+            await RegisterAndActivateUser(registerRequest);
 
             var loginRequest = new LoginRequest
             {
@@ -273,10 +312,14 @@ namespace ecommerce_api.Tests.IntegrationTests
             var registerRequest = new RegisterRequest
             {
                 Username = "inactiveuser",
+                FirstName = "Inactive",
+                LastName = "User",
                 Email = "inactive@example.com",
-                Password = "Test@1234"
+                PhoneNumber = "+1234567807",
+                Password = "Test@1234",
+                ConfirmPassword = "Test@1234"
             };
-            await _client.PostAsJsonAsync("/api/auth/register", registerRequest);
+            await RegisterAndActivateUser(registerRequest);
 
             // In a real test, you would mark the user as inactive here
             // For example: await _adminClient.PostAsync($"/api/admin/users/inactiveuser/deactivate", null);
@@ -323,10 +366,14 @@ namespace ecommerce_api.Tests.IntegrationTests
             var registerRequest = new RegisterRequest
             {
                 Username = "TestUser7",
+                FirstName = "Test",
+                LastName = "User7",
                 Email = "testuser7@example.com",
-                Password = "Test@1234"
+                PhoneNumber = "+1234567808",
+                Password = "Test@1234",
+                ConfirmPassword = "Test@1234"
             };
-            await _client.PostAsJsonAsync("/api/auth/register", registerRequest);
+            await RegisterAndActivateUser(registerRequest);
 
             // Login with lowercase username
             var loginRequest = new LoginRequest
