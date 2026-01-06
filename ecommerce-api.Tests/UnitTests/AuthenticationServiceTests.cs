@@ -22,10 +22,18 @@ namespace ecommerce_api.Tests.UnitTests
             var registerRequest = new RegisterRequest
             {
                 Username = "testuser",
+                FirstName = "Test",
+                LastName = "User",
                 Email = "test@example.com",
-                Password = "Test@1234"
+                PhoneNumber = "+1234567890",
+                Password = "Test@1234",
+                ConfirmPassword = "Test@1234"
             };
             await _authService.RegisterUser(registerRequest);
+            
+            // Activate account by verifying email
+            var user = await _authService.GetUserByUsername("testuser");
+            await _authService.VerifyEmail(user!.Email, user.ActivationToken!);
 
             var loginRequest = new LoginRequest
             {
@@ -34,14 +42,14 @@ namespace ecommerce_api.Tests.UnitTests
             };
 
             // Act
-            var (success, message, user) = await _authService.ValidateCredentials(loginRequest);
+            var (success, message, resultUser) = await _authService.ValidateCredentials(loginRequest);
 
             // Assert
             success.Should().BeTrue();
             message.Should().Be("Login successful");
-            user.Should().NotBeNull();
-            user!.Username.Should().Be("testuser");
-            user.Email.Should().Be("test@example.com");
+            resultUser.Should().NotBeNull();
+            resultUser!.Username.Should().Be("testuser");
+            resultUser.Email.Should().Be("test@example.com");
         }
 
         [Fact]
@@ -70,10 +78,18 @@ namespace ecommerce_api.Tests.UnitTests
             var registerRequest = new RegisterRequest
             {
                 Username = "testuser",
+                FirstName = "Test",
+                LastName = "User",
                 Email = "test@example.com",
-                Password = "Test@1234"
+                PhoneNumber = "+1234567890",
+                Password = "Test@1234",
+                ConfirmPassword = "Test@1234"
             };
             await _authService.RegisterUser(registerRequest);
+            
+            // Activate account
+            var user = await _authService.GetUserByUsername("testuser");
+            await _authService.VerifyEmail(user!.Email, user.ActivationToken!);
 
             var loginRequest = new LoginRequest
             {
@@ -82,12 +98,12 @@ namespace ecommerce_api.Tests.UnitTests
             };
 
             // Act
-            var (success, message, user) = await _authService.ValidateCredentials(loginRequest);
+            var (success, message, resultUser) = await _authService.ValidateCredentials(loginRequest);
 
             // Assert
             success.Should().BeFalse();
             message.Should().Be("Invalid username or password");
-            user.Should().BeNull();
+            resultUser.Should().BeNull();
         }
 
         [Fact]
@@ -97,8 +113,12 @@ namespace ecommerce_api.Tests.UnitTests
             var registerRequest = new RegisterRequest
             {
                 Username = "inactiveuser",
+                FirstName = "Inactive",
+                LastName = "User",
                 Email = "inactive@example.com",
-                Password = "Test@1234"
+                PhoneNumber = "+1234567891",
+                Password = "Test@1234",
+                ConfirmPassword = "Test@1234"
             };
             await _authService.RegisterUser(registerRequest);
             
@@ -128,12 +148,19 @@ namespace ecommerce_api.Tests.UnitTests
             var registerRequest = new RegisterRequest
             {
                 Username = "testuser",
+                FirstName = "Test",
+                LastName = "User",
                 Email = "test@example.com",
-                Password = "Test@1234"
+                PhoneNumber = "+1234567890",
+                Password = "Test@1234",
+                ConfirmPassword = "Test@1234"
             };
             await _authService.RegisterUser(registerRequest);
-
+            
+            // Activate account
             var userBeforeLogin = await _authService.GetUserByUsername("testuser");
+            await _authService.VerifyEmail(userBeforeLogin!.Email, userBeforeLogin.ActivationToken!);
+            
             var lastLoginBefore = userBeforeLogin!.LastLoginAt;
 
             var timestampBeforeLogin = DateTime.UtcNow;
@@ -161,10 +188,18 @@ namespace ecommerce_api.Tests.UnitTests
             var registerRequest = new RegisterRequest
             {
                 Username = "TestUser",
+                FirstName = "Test",
+                LastName = "User",
                 Email = "test@example.com",
-                Password = "Test@1234"
+                PhoneNumber = "+1234567890",
+                Password = "Test@1234",
+                ConfirmPassword = "Test@1234"
             };
             await _authService.RegisterUser(registerRequest);
+            
+            // Activate account
+            var user = await _authService.GetUserByUsername("TestUser");
+            await _authService.VerifyEmail(user!.Email, user.ActivationToken!);
 
             var loginRequest = new LoginRequest
             {
@@ -173,13 +208,13 @@ namespace ecommerce_api.Tests.UnitTests
             };
 
             // Act
-            var (success, message, user) = await _authService.ValidateCredentials(loginRequest);
+            var (success, message, resultUser) = await _authService.ValidateCredentials(loginRequest);
 
             // Assert
             success.Should().BeTrue();
             message.Should().Be("Login successful");
-            user.Should().NotBeNull();
-            user!.Username.Should().Be("TestUser");
+            resultUser.Should().NotBeNull();
+            resultUser!.Username.Should().Be("TestUser");
         }
 
         [Fact]
@@ -189,10 +224,18 @@ namespace ecommerce_api.Tests.UnitTests
             var registerRequest = new RegisterRequest
             {
                 Username = "testuser",
+                FirstName = "Test",
+                LastName = "User",
                 Email = "test@example.com",
-                Password = "Test@1234"
+                PhoneNumber = "+1234567890",
+                Password = "Test@1234",
+                ConfirmPassword = "Test@1234"
             };
             await _authService.RegisterUser(registerRequest);
+            
+            // Activate account
+            var user = await _authService.GetUserByUsername("testuser");
+            await _authService.VerifyEmail(user!.Email, user.ActivationToken!);
 
             var loginRequest = new LoginRequest
             {
@@ -201,13 +244,13 @@ namespace ecommerce_api.Tests.UnitTests
             };
 
             // Act
-            var (success, message, user) = await _authService.ValidateCredentials(loginRequest);
+            var (success, message, resultUser) = await _authService.ValidateCredentials(loginRequest);
 
             // Assert
             success.Should().BeTrue();
             message.Should().Be("Login successful");
-            user.Should().NotBeNull();
-            user!.Username.Should().Be("testuser");
+            resultUser.Should().NotBeNull();
+            resultUser!.Username.Should().Be("testuser");
         }
 
         [Fact]
@@ -229,8 +272,12 @@ namespace ecommerce_api.Tests.UnitTests
             var registerRequest = new RegisterRequest
             {
                 Username = "inactiveuser",
+                FirstName = "Inactive",
+                LastName = "User",
                 Email = "inactive@example.com",
-                Password = "Test@1234"
+                PhoneNumber = "+1234567891",
+                Password = "Test@1234",
+                ConfirmPassword = "Test@1234"
             };
             await _authService.RegisterUser(registerRequest);
             var user = await _authService.GetUserByUsername("inactiveuser");
@@ -251,9 +298,17 @@ namespace ecommerce_api.Tests.UnitTests
             await _authService.RegisterUser(new RegisterRequest
             {
                 Username = "validuser",
+                FirstName = "Valid",
+                LastName = "User",
                 Email = "valid@example.com",
-                Password = "Test@1234"
+                PhoneNumber = "+1234567892",
+                Password = "Test@1234",
+                ConfirmPassword = "Test@1234"
             });
+            
+            // Activate account
+            var validUser = await _authService.GetUserByUsername("validuser");
+            await _authService.VerifyEmail(validUser!.Email, validUser.ActivationToken!);
 
             var loginRequest3 = new LoginRequest
             {

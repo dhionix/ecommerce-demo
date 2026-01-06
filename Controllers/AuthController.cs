@@ -34,16 +34,31 @@ namespace ecommerce_api.Controllers
                 return BadRequest(new { message });
             }
 
-            var token = _jwtService.GenerateToken(user!);
-            var response = new AuthResponse
-            {
-                Token = token,
-                Username = user!.Username,
-                Email = user.Email,
-                ExpiresAt = _jwtService.GetTokenExpiration()
-            };
+            // Return success message with activation token (in production, this would be sent via email)
+            return CreatedAtAction(nameof(Register), new { id = user!.Id }, new { 
+                message, 
+                email = user.Email,
+                username = user.Username,
+                activationToken = user.ActivationToken // For testing/demo purposes
+            });
+        }
 
-            return CreatedAtAction(nameof(Register), new { id = user.Id }, response);
+        [HttpPost("verify-email")]
+        public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var (success, message) = await _authService.VerifyEmail(request.Email, request.Token);
+
+            if (!success)
+            {
+                return BadRequest(new { message });
+            }
+
+            return Ok(new { message });
         }
 
         [HttpPost("login")]
