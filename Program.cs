@@ -1,5 +1,6 @@
 using ecommerce_api.Data;
 using ecommerce_api.Services;
+using AspNetCoreRateLimit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -25,6 +26,12 @@ public class Program
                     var configuration = context.Configuration;
 
                     services.AddControllers();
+                    
+                    // Configure Rate Limiting
+                    services.AddMemoryCache();
+                    services.Configure<IpRateLimitOptions>(configuration.GetSection("IpRateLimiting"));
+                    services.AddInMemoryRateLimiting();
+                    services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
                     
                     // Configure JWT Authentication
                     var jwtSecret = configuration["Jwt:Secret"] ?? throw new InvalidOperationException("JWT Secret not configured");
@@ -95,6 +102,13 @@ public class Program
                     {
                         app.UseDeveloperExceptionPage();
                     }
+                    
+                    // Add IP rate limiting middleware (except in test environment)
+                    if (!env.IsEnvironment("Test"))
+                    {
+                        app.UseIpRateLimiting();
+                    }
+                    
                     app.UseRouting();
                     app.UseAuthentication();
                     app.UseAuthorization();
