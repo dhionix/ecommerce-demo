@@ -22,7 +22,6 @@ namespace ecommerce_api.Models.DTOs
 
         [Required]
         [Phone]
-        [RegularExpression(@"^\+?[1-9]\d{1,14}$", ErrorMessage = "Phone number must be in valid format")]
         public required string PhoneNumber { get; set; }
 
         [StringLength(200)]

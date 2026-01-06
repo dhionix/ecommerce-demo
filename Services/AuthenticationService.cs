@@ -49,8 +49,8 @@ namespace ecommerce_api.Services
             _users[user.Id] = user;
 
             // In a real application, you would send an email here with the activation link
-            // For now, we'll just return success with a message
-            return await Task.FromResult((true, $"User registered successfully. Please verify your email using the activation token: {activationToken}", user));
+            // For now, we'll just return success
+            return await Task.FromResult((true, "User registered successfully. Please check your email to verify your account.", user));
         }
 
         public async Task<(bool Success, string Message)> VerifyEmail(string email, string token)

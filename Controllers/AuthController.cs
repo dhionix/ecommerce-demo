@@ -34,13 +34,29 @@ namespace ecommerce_api.Controllers
                 return BadRequest(new { message });
             }
 
-            // Return success message with activation token (in production, this would be sent via email)
-            return CreatedAtAction(nameof(Register), new { id = user!.Id }, new { 
-                message, 
-                email = user.Email,
-                username = user.Username,
-                activationToken = user.ActivationToken // For testing/demo purposes
-            });
+            // Return success message without token for security
+            // In production, the activation token would be sent via email
+            // For development/testing, check environment or use a configuration flag
+            var response = new { 
+                message = "User registered successfully. Please check your email to verify your account.", 
+                email = user!.Email,
+                username = user.Username 
+            };
+            
+            // Only include activation token in development/test for testing convenience
+            var env = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
+            if (env.IsDevelopment() || env.IsEnvironment("Test"))
+            {
+                return CreatedAtAction(nameof(Register), new { id = user.Id }, new {
+                    response.message,
+                    response.email,
+                    response.username,
+                    activationToken = user.ActivationToken,
+                    note = "Activation token included for development/testing only"
+                });
+            }
+
+            return CreatedAtAction(nameof(Register), new { id = user.Id }, response);
         }
 
         [HttpPost("verify-email")]
